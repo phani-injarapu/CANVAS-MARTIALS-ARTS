@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MARTIALS-ARTS SCHOOL</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<style type="text/css">
+		.btn
+		{
+			position: relative;
+		}
+		.b
+		{
+			position: absolute;
+			top:670px;
+		    right:0px;
+		}
+		.a
+		{
+			position: absolute;
+		}
+	</style>
+</head>
+<body>
+<img id="scream" width="1530" height="715" src="background.jpg" alt="The Scream" style="position: absolute;">
+<canvas id="myCanvas" width="500" height="700" style="position: absolute;"></canvas>
+<div class="container a">
+	<marquee><b style="color:green">LEFT ARROW &nbsp(&#8592;) &nbsp Kick&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</b>
+	<b  style="color:red">RIGHT ARROW &nbsp(&#8594;) &nbsp Punch&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</b>
+	<b  style="color:blue">UP ARROW &nbsp(&#8593;) &nbsp Forward&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</b>
+	<b  style="color:grey">DOWN ARROW &nbsp (&#8595;) &nbsp Backward&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</b></marquee>
+
+</div>
+<div class="container b">
+	<div class="row">
+		<div class="col">
+			<button class="btn btn-primary" id="forward">Forward</button>
+			<button class="btn btn-success" id="kick">Kick</button>
+			<button class="btn btn-warning" id="block">Block</button>
+			<button class="btn btn-danger" id="punch">Punch</button>
+			<button class="btn btn-info" id="backward">Backward</button>
+		</div>
+	</div>
+
+		
+
+</div>
+<script>
+let c = document.getElementById("myCanvas");
+let ctx = c.getContext("2d");
+window.onload = function() {
+  var img = document.getElementById("scream");
+  ctx.drawImage(img, 10, 10);
+}
+let loadImage = (src,callback)=>
+{
+	let img = document.createElement("img");
+	img.onload=()=> callback(img);
+	img.src=src;
+};
+
+let imagePath = (frameNumber,animation) =>
+{
+	return "images/" + animation + "/" + frameNumber + ".png";
+};
+
+let frames= {
+	idle: [1,2,3,4,5,6,7,8],
+	kick:[1,2,3,4,5,6,7],
+	punch:[1,2,3,4,5,6,7],
+	forward:[1,2,3,4,5,6],
+	backward:[1,2,3,4,5,6],
+	block:[1,2,3,4,5,6,7,8,9],
+};
+
+let loadImages = (callback) =>
+{
+	let images={idle:[],kick:[],punch:[],forward:[],backward:[],block:[]};
+	let imagesToLoad=0;
+	["idle","kick","punch","forward","backward","block"].forEach((animation)=>
+	{
+		let animationFrames = frames[animation];
+		imagesToLoad = imagesToLoad + animationFrames.length;
+		animationFrames.forEach((frameNumber) => {
+			let path = imagePath(frameNumber,animation);
+		
+		
+
+		loadImage(path,(image)=>
+		{
+			images[animation][frameNumber-1]= image;
+			imagesToLoad=imagesToLoad-1;
+
+			if(imagesToLoad === 0)
+			{
+				callback(images);
+			}
+		});
+		});
+	});
+};
+
+let animate = (ctx,images,animation,callback) =>
+{
+
+	images[animation].forEach((image,index) =>
+	{
+		setTimeout(()=> {
+			ctx.clearRect(0,150,500,700);
+			ctx.drawImage(image,0,150,500,500);
+		},index*100);
+	});
+	setTimeout(callback,images[animation].length*100);
+};
+
+loadImages((images) =>
+{
+	let queuedAnimations = [];
+
+	let aux=() => {
+		let selectedAnimation;
+		if(queuedAnimations.length === 0)
+		{
+			selectedAnimation = "idle"
+		}
+		else{
+			selectedAnimation = queuedAnimations.shift();
+		}
+		animate(ctx,images,selectedAnimation,aux)
+	}
+	aux();
+
+	document.getElementById("kick").onclick = () =>
+	{
+		queuedAnimations.push("kick");
+	};
+
+	document.getElementById("punch").onclick = () =>
+	{
+		queuedAnimations.push("punch");
+	};
+
+	document.getElementById("forward").onclick = () =>
+	{
+		queuedAnimations.push("forward");
+	};
+
+	document.getElementById("backward").onclick = () =>
+	{
+		queuedAnimations.push("backward");
+	};
+
+	document.getElementById("block").onclick = () =>
+	{
+		queuedAnimations.push("block");
+	};
+
+	document.addEventListener("keyup",(event) =>
+	{
+		const key = event.key;
+
+		if(key === "ArrowLeft") {
+			queuedAnimations.push("kick");
+		} else if (key === "ArrowRight") {
+			queuedAnimations.push("punch");
+		} else if (key === "ArrowUp") {
+			queuedAnimations.push("forward");
+		} else if (key === "ArrowDown") {
+			queuedAnimations.push("backward");
+		}
+	});
+
+});
+
+</script>
+</body>
+</html>
